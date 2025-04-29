@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
+import loginpng from '../assets/login.png';
 
 function Home() {
     const navigate = useNavigate();
@@ -454,7 +455,7 @@ function Home() {
                                     <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-white justify-content-center min-vh-100 p-4 home1">
                                         <h2>Login</h2>
                                         <p>Get access to your Orders, Wishlist and Recommendations</p>
-                                        <img src="src\assets\login.png" className="img-fluid" />
+                                        <img src={loginpng} className="img-fluid" />
                                     </div>
                                     <div className="col-lg-6 col-md-6 col-12  d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
                                         style={{ backgroundColor: "Transparent" }}>
