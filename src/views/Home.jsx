@@ -178,9 +178,12 @@ function Home() {
         }
     };
 
-    const handleSignUp = () => {
+    const handleSignUp = (e) => {
+        e.preventDefault();
+        const modal = window.bootstrap.Modal.getInstance(loginModalRef.current);
+        if (modal) modal.hide(); // Close modal first
         navigate('/dashboard');
-    }
+      };
     const handleImageClick = () => {
         alert('Clicked New Arrival Product!!!!')
         //navigate("/dashboard/new-arrivals");
@@ -528,7 +531,7 @@ function Home() {
 
                                             <button className="btn btn-success btn-lg w-100"
                                                 style={{ background: "linear-gradient(45deg, #DE2B59, #F8483C)" }}
-                                                type="submit"
+                                                type="button"
                                                 onClick={handleSignUp}
                                             >Sign Up
                                             </button>
