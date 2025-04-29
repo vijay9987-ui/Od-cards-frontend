@@ -518,7 +518,13 @@ function Home() {
                                             <input type="name" className="form-control mb-3 w-100" placeholder="Name" name="name" required />
                                             <input type="email" className="form-control mb-3 w-100" placeholder="Email" name="email" required />
                                             <input type="tel" className="form-control mb-3 w-100" placeholder="Mobile Number" name="mobile" maxLength={10} required />
-                                            <input type="location" className="form-control mb-3 w-100" placeholder="Location" name="location" required />
+                                            <select className="form-control mb-3 w-100" name="location" required>
+                                                <option value="">Select Location</option>
+                                                <option value="hyderabad">Hyderabad</option>
+                                                <option value="bengaluru">Bengaluru</option>
+                                                <option value="chennai">Chennai</option>
+                                            </select>
+
 
                                             <button className="btn btn-success btn-lg w-100"
                                                 style={{ background: "linear-gradient(45deg, #DE2B59, #F8483C)" }}
