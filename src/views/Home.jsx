@@ -482,7 +482,7 @@ function Home() {
                                     <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-white justify-content-center min-vh-100 p-4 home1">
                                         <h2>Verify OTP</h2>
                                         <p>Get access to your Orders, Wishlist and Recommendations</p>
-                                        <img src="src\assets\login.png" className="img-fluid" />
+                                        <img src={loginpng} className="img-fluid" />
                                     </div>
                                     <div className="col-lg-6 col-md-6 col-12  d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
                                         style={{ background: 'transparent' }}>
@@ -509,7 +509,7 @@ function Home() {
                                     <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-white justify-content-center min-vh-100 p-4 home1">
                                         <h2>Sign Up</h2>
                                         <p>Get access to your Orders, Wishlist and Recommendations</p>
-                                        <img src="src\assets\login.png" className="img-fluid" />
+                                        <img src={loginpng} className="img-fluid" />
                                     </div>
                                     <div className="col-lg-6 col-md-6 col-12  d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
                                         style={{ background: 'transparent' }}>
