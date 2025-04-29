@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import logo from './com-assets/odcards-logo.png';
 
 function Footer() {
 
@@ -8,7 +9,7 @@ function Footer() {
             <div className="container-fluid p-5 pb-5 " style={{ backgroundColor: "#000000", color: "white" }}>
                 <div className="row">
                     <div className="col-sm-4 p-5">
-                        <img src="https://s3-alpha-sig.figma.com/img/6136/6658/c55043b8ddcd5eceb360744dcafed79e?Expires=1745798400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=BZ6A8kotDbd6Ncn83xyU~GlsphoxrDeE5HCckDjeg-ZNuzeJWtZsLW~YIp8uR3UACVfyFmTmcTlrMLxIqwXn5efU20m5dGPE8C8w9HHGZlZx~UsF-Srnqj5TmOIqwQSlYPi7ZDGliR6jDHHdhVUhmuB55~HbeqF6n~UyL6EQw73xHUPaztzphnO8q8SZu3L-Bd8hXJw-aRJrRXcqZi8fVXUeF~8NkOfGbbR-WsXSa7dRvEvdDIzLVpJmZXqO6Cs~ssCW9SAR7L91B3GCsPnoZj1x2LlVAUewX6kzgNZgw1mFwZPgtKYheHd1uezmuiNA4BzqI1As~WUCa7EeFGTu8w__" /><br /><br />
+                        <img src={logo} /><br /><br />
                         <p>Printing for what’s to come. What’s more, we do it right! A full administration printing Get the latest news, events & more delivered to your inbox.. Read More </p><br /><br />
                         
                     </div>

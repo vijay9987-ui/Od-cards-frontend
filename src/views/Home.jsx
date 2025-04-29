@@ -141,17 +141,17 @@ function Home() {
     ];
 
     const offers = [
-        { id: 1, image: "src/assets/wedcard.jpg" },
-        { id: 2, image: "src/assets/wedcard.jpg" },
-        { id: 3, image: "src/assets/wedcard.jpg" },
-        { id: 4, image: "src/assets/wedcard.jpg" },
+        { id: 1, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+        { id: 2, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+        { id: 3, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+        { id: 4, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
     ];
 
     const bestsellers = [
-        { id: 1, image: "src/assets/wedcard.jpg" },
-        { id: 2, image: "src/assets/wedcard.jpg" },
-        { id: 3, image: "src/assets/wedcard.jpg" },
-        { id: 4, image: "src/assets/wedcard.jpg" },
+        { id: 1, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+        { id: 2, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+        { id: 3, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+        { id: 4, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
     ];
 
     const loginModalRef = useRef(null);
@@ -267,10 +267,10 @@ function Home() {
                 <br />
                 <div className="row g-4">
                     {[
-                        { title: "Wedding Cards", imgSrc: "src/assets/category.png" },
-                        { title: "Readymade Wedding Cards", imgSrc: "src/assets/category.png" },
-                        { title: "Visiting Cards", imgSrc: "src/assets/category.png" },
-                        { title: "Invitation Cards", imgSrc: "src/assets/category.png" }
+                        { title: "Wedding Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+                        { title: "Readymade Wedding Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+                        { title: "Visiting Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
+                        { title: "Invitation Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" }
                     ].map((category, index) => (
                         <div key={index} className="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div className="card text-bg-dark" onClick={loginModal}>

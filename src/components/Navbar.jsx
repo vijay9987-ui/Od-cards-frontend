@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import logo from './com-assets/odcards-logo.png';
 
 
 function Navbar() {
@@ -27,7 +28,7 @@ function Navbar() {
                         <span className="navbar-toggler-icon"></span>
                     </button>
                     <div>
-                        <img src="https://s3-alpha-sig.figma.com/img/6136/6658/c55043b8ddcd5eceb360744dcafed79e?Expires=1745798400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=BZ6A8kotDbd6Ncn83xyU~GlsphoxrDeE5HCckDjeg-ZNuzeJWtZsLW~YIp8uR3UACVfyFmTmcTlrMLxIqwXn5efU20m5dGPE8C8w9HHGZlZx~UsF-Srnqj5TmOIqwQSlYPi7ZDGliR6jDHHdhVUhmuB55~HbeqF6n~UyL6EQw73xHUPaztzphnO8q8SZu3L-Bd8hXJw-aRJrRXcqZi8fVXUeF~8NkOfGbbR-WsXSa7dRvEvdDIzLVpJmZXqO6Cs~ssCW9SAR7L91B3GCsPnoZj1x2LlVAUewX6kzgNZgw1mFwZPgtKYheHd1uezmuiNA4BzqI1As~WUCa7EeFGTu8w__" 
+                        <img src={logo} 
                         alt="OdCards" onClick={()=>{navigate('/dashboard')}}/>
                     </div>
 
