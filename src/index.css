@@ -248,3 +248,7 @@
     height: 450px;
   }
 }
+
+.nav-link.active {
+  font-weight: bold;
+}

@@ -53,7 +53,7 @@ const ProfilePage = () => {
         <>
             <Navbar />
             <div className="container py-5">
-                <h2 className="text-center fw-bold mb-5">My Profile</h2>
+                
 
                 <div className="row">
                     {/* Sidebar */}

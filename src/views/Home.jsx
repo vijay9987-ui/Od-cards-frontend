@@ -183,7 +183,7 @@ function Home() {
         const modal = window.bootstrap.Modal.getInstance(loginModalRef.current);
         if (modal) modal.hide(); // Close modal first
         navigate('/dashboard');
-      };
+    };
     const handleImageClick = () => {
         alert('Clicked New Arrival Product!!!!')
         //navigate("/dashboard/new-arrivals");
@@ -319,8 +319,8 @@ function Home() {
                     })}
                 </div>
                 <div className="carousel-controls text-center">
-                    <button onClick={() => slide("prev")} className="carousel-btn">←</button>
-                    <button onClick={() => slide("next")} className="carousel-btn">→</button>
+                    <button onClick={() => slide("prev")} className="btn" style={{ background: 'linear-gradient(to right, #F8483C, #DE2B59)', color: "white" }}><i className="fa-solid fa-arrow-left"></i></button>
+                    <button onClick={() => slide("next")} className="btn" style={{ background: 'linear-gradient(to right, #F8483C, #DE2B59)', color: "white" }}><i className="fa-solid fa-arrow-right"></i></button>
                 </div>
             </div>
 
@@ -471,7 +471,13 @@ function Home() {
                                                 onClick={() => { setStep(2) }}
                                             >Request OTP
                                             </button><br />
-                                            <p>By continuing, you to OD Card’sTerms & Conditions andPrivacy policy</p>
+                                            <div className="form-check mb-3">
+                                                <input className="form-check-input" type="checkbox" id="termsCheckbox" required />
+                                                <label className="form-check-label" htmlFor="termsCheckbox">
+                                                    By continuing, you agree to OD Card’s <a href="#" target="_blank">Terms & Conditions</a> and <a href="#" target="_blank">Privacy Policy</a>
+                                                </label>
+                                            </div>
+
                                         </form>
                                     </div>
                                 </div>
@@ -521,12 +527,15 @@ function Home() {
                                             <input type="name" className="form-control mb-3 w-100" placeholder="Name" name="name" required />
                                             <input type="email" className="form-control mb-3 w-100" placeholder="Email" name="email" required />
                                             <input type="tel" className="form-control mb-3 w-100" placeholder="Mobile Number" name="mobile" maxLength={10} required />
-                                            <select className="form-control mb-3 w-100" name="location" required>
-                                                <option value="">Select Location</option>
+                                            <select className="form-select mb-3 w-100" name="location" required>
+                                                <option value="none" disabled>Select Location</option>
                                                 <option value="hyderabad">Hyderabad</option>
                                                 <option value="bengaluru">Bengaluru</option>
                                                 <option value="chennai">Chennai</option>
                                             </select>
+
+
+
 
 
                                             <button className="btn btn-success btn-lg w-100"
