@@ -95,7 +95,7 @@ function Navbar() {
                                 <i className="fa-solid fa-user fa-xl" style={{ color: `${location.pathname === "/dashboard/profile" ? "#DE2B59" : "#000"}` }}></i>
                             </button>
                             <button className="btn" type="button" onClick={handleLogout}>
-                                <i className="fa-solid fa-right-from-bracket fa-xl " style={{ color: "#000000" }}></i>
+                                <i className="fa-solid fa-right-from-bracket fa-xl " style={{ display: `${location.pathname === "/" ? "none" : "inline-block"}` }}></i>
                             </button>
                         </div>
                     </div>
