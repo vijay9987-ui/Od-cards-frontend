@@ -29,7 +29,7 @@ const MyCart = () => {
     },
   ]);
 
-  const [cartItems, setCartItems] = useState([]); // Initial products removed
+  const [cartItems, setCartItems] = useState([]);
 
   const [address, setAddress] = useState({
     firstName: "",
@@ -40,14 +40,13 @@ const MyCart = () => {
     type: "Home",
   });
 
-  const [selectedAddress, setSelectedAddress] = useState(null); // Store selected address for checkout
-  const [editingAddress, setEditingAddress] = useState(null); // Store address being edited
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [editingAddress, setEditingAddress] = useState(null);
 
-  // Accept the new item passed from ReadyMadeCards via location.state
   useEffect(() => {
     if (location.state?.newItem) {
-      setCartItems((prevItems) => [...prevItems, location.state.newItem]);
-      // Clear the navigation state to avoid adding duplicate on refresh
+      const newItem = { ...location.state.newItem, quantity: 1 };
+      setCartItems((prevItems) => [...prevItems, newItem]);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -56,12 +55,20 @@ const MyCart = () => {
     setCartItems(cartItems.filter((item) => item.id !== id));
   };
 
+  const handleQuantityChange = (id, quantity) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: parseInt(quantity) || 1 } : item
+      )
+    );
+  };
+
   const priceDetails = {
-    itemsPrice: cartItems.length * 100,
+    itemsPrice: cartItems.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0),
     discount: 500,
     delivery: 40,
-    total: 500,
   };
+  priceDetails.total = priceDetails.itemsPrice - priceDetails.discount + priceDetails.delivery;
 
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
@@ -72,20 +79,14 @@ const MyCart = () => {
     setShowAddressForm(true);
   };
 
-  // Save new address to savedAddresses
   const handleAddAddress = () => {
     const newAddress = {
-      id: savedAddresses.length + 1, // Generate new ID based on the length
-      firstName: address.firstName,
-      lastName: address.lastName,
-      address: address.address,
-      city: address.city,
-      pincode: address.pincode,
-      type: address.type,
+      id: savedAddresses.length + 1,
+      ...address,
     };
 
-    setSavedAddresses((prevAddresses) => [...prevAddresses, newAddress]);
-    setShowAddressForm(false); // Hide the form after adding the address
+    setSavedAddresses((prev) => [...prev, newAddress]);
+    setShowAddressForm(false);
     setAddress({
       firstName: "",
       lastName: "",
@@ -93,42 +94,29 @@ const MyCart = () => {
       city: "",
       pincode: "",
       type: "Home",
-    }); // Clear the form
+    });
   };
 
-  // Set the address form with the selected saved address
   const handleSelectAddress = (address) => {
-    setSelectedAddress(address); // Set the selected address for checkout
+    setSelectedAddress(address);
   };
 
-  // Handle delete address functionality
   const handleDeleteAddress = (id) => {
     setSavedAddresses(savedAddresses.filter((address) => address.id !== id));
   };
 
-  // Set the address form to edit mode
   const handleEditAddress = (address) => {
     setEditingAddress(address);
-    setAddress({
-      firstName: address.firstName,
-      lastName: address.lastName,
-      address: address.address,
-      city: address.city,
-      pincode: address.pincode,
-      type: address.type,
-    });
-    setShowAddressForm(true); // Show address form when editing
+    setAddress({ ...address });
+    setShowAddressForm(true);
   };
 
-  // Update edited address
   const handleUpdateAddress = () => {
-    setSavedAddresses((prevAddresses) =>
-      prevAddresses.map((addr) =>
-        addr.id === editingAddress.id ? { ...addr, ...address } : addr
-      )
+    setSavedAddresses((prev) =>
+      prev.map((addr) => (addr.id === editingAddress.id ? { ...addr, ...address } : addr))
     );
-    setEditingAddress(null); // Clear editing mode
-    setShowAddressForm(false); // Hide form after updating
+    setEditingAddress(null);
+    setShowAddressForm(false);
     setAddress({
       firstName: "",
       lastName: "",
@@ -148,7 +136,6 @@ const MyCart = () => {
           <i className="fa fa-shopping-cart me-2"></i>My Cart
         </h3>
 
-        {/* Cart Items (no initial products) */}
         {cartItems.length === 0 ? (
           <p>No items in your cart</p>
         ) : (
@@ -162,13 +149,21 @@ const MyCart = () => {
               />
               <div className="flex-grow-1">
                 <h5 className="fw-bold">{item.title}</h5>
-                <select className="form-select w-auto my-2">
-                  <option>Select Quantity</option>
-                  <option>50</option>
-                  <option>100</option>
+                <select
+                  className="form-select w-auto my-2"
+                  value={item.quantity}
+                  onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                >
+                  {[1, 2, 3, 4, 5, 10, 25, 50, 100].map((qty) => (
+                    <option key={qty} value={qty}>
+                      {qty}
+                    </option>
+                  ))}
                 </select>
                 <p className="text-muted mb-2">Delivery by 26 Feb</p>
-                <p className="fw-bold">Total: ₹ {item.price}</p>
+                <p className="fw-bold">
+                  Total: ₹ {item.price * (item.quantity || 1)}
+                </p>
                 <button
                   className="btn me-2"
                   style={{
@@ -189,13 +184,13 @@ const MyCart = () => {
           ))
         )}
 
-        {/* Price & Address */}
         <div className="row mt-5">
           <div className="col-md-6 mb-4">
             <h5 className="fw-bold mb-3">Price Details</h5>
             <ul className="list-group">
               <li className="list-group-item d-flex justify-content-between">
-                Price ({cartItems.length} item) <span>₹ {priceDetails.itemsPrice}</span>
+                Price ({cartItems.length} item)
+                <span>₹ {priceDetails.itemsPrice}</span>
               </li>
               <li className="list-group-item d-flex justify-content-between">
                 Discount <span className="text-success">-₹ {priceDetails.discount}</span>
@@ -210,11 +205,9 @@ const MyCart = () => {
             <p className="text-success mt-2">You save ₹ 20 on this order</p>
           </div>
 
-          {/* Address Form */}
           <div className="col-md-6 mb-4">
             <h5 className="fw-bold mb-3">Delivery Details</h5>
 
-            {/* Show saved addresses initially */}
             {!showAddressForm ? (
               <>
                 <div className="mb-3">
@@ -225,7 +218,7 @@ const MyCart = () => {
                       <div
                         key={addr.id}
                         className={`border p-3 mb-2 rounded`}
-                        onClick={() => handleSelectAddress(addr)} // Select address for checkout
+                        onClick={() => handleSelectAddress(addr)}
                         style={{
                           background:
                             selectedAddress?.id === addr.id
@@ -244,7 +237,7 @@ const MyCart = () => {
                         <button
                           className="btn btn-outline-danger btn-sm mt-2"
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevent triggering address select
+                            e.stopPropagation();
                             handleDeleteAddress(addr.id);
                           }}
                         >
@@ -253,7 +246,7 @@ const MyCart = () => {
                         <button
                           className="btn btn-outline-primary btn-sm mt-2 ms-2"
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevent triggering address select
+                            e.stopPropagation();
                             handleEditAddress(addr);
                           }}
                         >
@@ -272,7 +265,6 @@ const MyCart = () => {
               </>
             ) : (
               <>
-                {/* Add/Edit Address Form */}
                 <div className="row g-2 mb-2">
                   <div className="col">
                     <input

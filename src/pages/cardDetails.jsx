@@ -7,15 +7,13 @@ const CardDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get the card data passed from VisitingCards component
   const { quantity, card } = location.state || {};
 
-  // Initialize with default values if no card was passed
   const defaultCard = {
     id: 0,
     image: "https://img.freepik.com/free-vector/modern-blue-color-wave-style-business-card-design-vector_1055-11467.jpg",
     description: "Default Card Description",
-    categoryId: 1
+    categoryId: 1,
   };
 
   const selectedCard = card || defaultCard;
@@ -29,14 +27,30 @@ const CardDetails = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Prepare order data with card details and uploads
-    const orderData = {
-      card: selectedCard,
-      quantity: quantity || 1,
-      uploads: uploads.filter(upload => upload !== null)
+    navigate("/dashboard/mycart", {
+      state: {
+        newItem: {
+          id: selectedCard.id,
+          title: selectedCard.description || "Custom Invitation Card",
+          image: selectedCard.image,
+          price: "20",
+          quantity: quantity || 1,
+          uploads: uploads.filter((upload) => upload !== null),
+        },
+      },
+    });
+  };
+
+  const handleAddToCart = (index) => {
+    const item = {
+      id: selectedCard.id,
+      title: selectedCard.description || "Custom Card",
+      image: selectedCard.image,
+      price: "20",
+      upload: uploads[index],
     };
-    console.log("Order submitted:", orderData);
-    // You can add your submission logic here (API call, etc.)
+    console.log("Item added to cart:", item);
+    // Optional: you can push this item to local storage or API
   };
 
   return (
@@ -45,7 +59,6 @@ const CardDetails = () => {
       <div className="container py-5">
         <h2 className="text-center mb-4">Card Details</h2>
         <div className="row">
-          {/* Image and Quantity */}
           <div className="col-12 col-md-6 mb-4">
             <div className="card mb-4">
               <div className="card-body">
@@ -60,7 +73,6 @@ const CardDetails = () => {
             </div>
           </div>
 
-          {/* Card Description */}
           <div className="col-12 col-md-6 mb-4">
             <h5>Description:</h5>
             <p className="card-title">{selectedCard.description}</p>
@@ -74,7 +86,6 @@ const CardDetails = () => {
           <h4 className="mb-4 fw-bold text-center">🎨 Upload Your Designs</h4>
 
           <div className="row g-4">
-            {/* Upload Design Cards */}
             {Array.from({ length: quantity || 1 }).map((_, index) => (
               <div key={index} className="col-12 col-sm-6 col-md-4 col-lg-4">
                 <div className="card shadow-sm border-0 h-100">
@@ -131,9 +142,9 @@ const CardDetails = () => {
                       type="button"
                       className="btn text-white"
                       style={{ background: "linear-gradient(to right, #DF2C58, #FF688D)" }}
-                      onClick={() => alert(`Proceeding with Upload #${index + 1}`)}
+                      onClick={() => handleAddToCart(index)}
                     >
-                      Proceed
+                      Add To Cart
                     </button>
                   </div>
                 </div>

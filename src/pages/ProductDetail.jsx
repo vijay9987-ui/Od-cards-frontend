@@ -1,12 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    
-    // Sample product data - in a real app, you'd fetch this based on the ID
+    const [quantity, setQuantity] = useState(1);
+
     const products = [
         {
             id: 1,
@@ -79,7 +80,6 @@ function ProductDetail() {
             ]
         }
     ];
-    
 
     const product = products.find(p => p.id === parseInt(id)) || {
         id: id,
@@ -95,13 +95,18 @@ function ProductDetail() {
     };
 
     const handleAddToCart = () => {
-        // Add to cart functionality here
-        alert(`Added ${product.name} to cart!`);
-        console.log(product);
+        const cartItem = {
+            id: product.id,
+            title: product.name,
+            image: product.image,
+            price: product.price,
+            quantity
+        };
+        navigate('/dashboard/mycart', { state: { newItem: cartItem } });
     };
 
     const handleBackClick = () => {
-        navigate(-1); // Go back to previous page
+        navigate(-1);
     };
 
     return (
@@ -143,6 +148,19 @@ function ProductDetail() {
                                     <li key={index}>{feature}</li>
                                 ))}
                             </ul>
+
+                            <div className="mb-3">
+                                <label htmlFor="quantity" className="form-label">Quantity</label>
+                                <input
+                                    type="number"
+                                    id="quantity"
+                                    className="form-control"
+                                    style={{ maxWidth: "120px" }}
+                                    min="1"
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                                />
+                            </div>
                             
                             <div className="d-flex gap-3">
                                 <button 

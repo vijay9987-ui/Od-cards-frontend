@@ -209,8 +209,18 @@ const InvitationCardDetails = () => {
       </div>
     );
   }
-  const handleAddToCart = () =>{
-    console.log(card);
+
+  const handleAddToCart = () => {
+    navigate('/dashboard/mycart', {
+      state: {
+        newItem: {
+          id: card.id,
+          title: card.title,
+          image: card.image,
+          price: card.price.replace('$', ''), // Convert "$20" to "20" for consistency
+        }
+      }
+    });
   }
 
   return (

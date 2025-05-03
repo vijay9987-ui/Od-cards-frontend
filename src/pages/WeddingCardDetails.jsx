@@ -127,8 +127,21 @@ const WeddingCardDetails = () => {
 
   const relatedCards = allCards.filter(card => card.id !== selectedCard.id && card.category === selectedCard.category).slice(0, 4);
 
-  const handleProceed=()=>{
+  const handleAddToCart=()=>{
     console.log(selectedCard);
+  }
+
+  const handleProceed = () => {
+    navigate('/dashboard/mycart', {
+      state: {
+        newItem: {
+          id: selectedCard.id,
+          title: selectedCard.title,
+          image: selectedCard.image,
+          price: selectedCard.price.replace('$', ''), // Convert "$20" to "20" for consistency
+        }
+      }
+    });
   }
 
   return (
@@ -176,10 +189,11 @@ const WeddingCardDetails = () => {
                     : 'linear-gradient(135deg, #DF2C58, #FF688D)',
                   border: 'none'
                 }}
+                onClick={handleAddToCart}
               >
                 {selectedCard.price === "Free" ? "Download Now" : "Add to Cart"}
               </button>
-              <button className="btn btn-lg text-light" onClick={handleProceed} style={{background: "linear-gradient(to right, #DF2C58, #FF688D)"}}>Proceed</button>
+              <button className="btn btn-lg text-light" onClick={handleProceed}  style={{background: "linear-gradient(to right, #DF2C58, #FF688D)"}}>Proceed</button>
             </div>
           </div>
         </div>
