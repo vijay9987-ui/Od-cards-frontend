@@ -116,7 +116,7 @@ const WeddingCards = () => {
     return (
         <>
             <Navbar />
-            <div className="container-fluid w-100">
+            {/* {<div className="container-fluid w-100">
                 <div className="row h-100 align-items-center justify-content-center">
                     <div className="col-sm-6 p-3">
                         <h1><b>Wedding Cards</b></h1><br />
@@ -152,13 +152,15 @@ const WeddingCards = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
+
+            <h2 className="text-center fw-bold mb-4">Wedding Cards</h2>
 
             {/* Category Selector */}
             <div className="container-fluid p-5">
                 <div className="row align-items-center text-center text-md-start">
                     <div className="col-12 col-md-4">
-                        <h3 className="text3" style={{ color: "#367619" }}>Select Category</h3>
+                        <h3 className="text3" style={{ color: "#000" }}>Select Category</h3>
                         <div className="btn-group">
                             <button
                                 className="btn"

@@ -10,6 +10,41 @@ function Home() {
     const [otp, setOtp] = useState(["", "", "", ""]);
     const [timer, setTimer] = useState(30);
     const [resendDisabled, setResendDisabled] = useState(true);
+    const [mobileNumber, setMobileNumber] = useState("");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [location, setLocation] = useState("");
+    const [otpInput, setOtpInput] = useState("");
+    const [termsAccepted, setTermsAccepted] = useState(false);
+    const [centerIndex, setCenterIndex] = useState(2);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [errors, setErrors] = useState({
+        mobile: "",
+        otp: "",
+        name: "",
+        email: "",
+        location: "",
+        terms: ""
+    });
+
+    const [user, setUser] = useState(null);
+
+    // Check for existing session on component mount
+    useEffect(() => {
+        const storedUser = sessionStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
+
+    // Redirect to dashboard if user is logged in
+    useEffect(() => {
+        if (user) {
+            navigate('/dashboard');
+        }
+    }, [user, navigate]);
+
+
 
     const products = [
         {
@@ -54,7 +89,7 @@ function Home() {
         }
     ];
 
-    const [centerIndex, setCenterIndex] = useState(2);
+
 
 
     useEffect(() => {
@@ -172,33 +207,162 @@ function Home() {
         newOtp[index] = value;
         setOtp(newOtp);
 
-        // Move to next input
         if (value && index < 3) {
             document.getElementById(`otp-${index + 1}`).focus();
         }
     };
 
-    const handleSignUp = (e) => {
+    const validateMobile = () => {
+        if (!mobileNumber) {
+            setErrors({ ...errors, mobile: "Mobile number is required" });
+            return false;
+        }
+        if (mobileNumber.length !== 10) {
+            setErrors({ ...errors, mobile: "Enter a valid 10-digit mobile number" });
+            return false;
+        }
+        setErrors({ ...errors, mobile: "" });
+        return true;
+    };
+
+    // Generate a random 4-digit OTP (for demo purposes)
+    const generateOTP = () => {
+        return Math.floor(1000 + Math.random() * 9000).toString();
+    };
+
+    const [generatedOTP, setGeneratedOTP] = useState("");
+
+    const handleRequestOTP = (e) => {
         e.preventDefault();
-        const modal = window.bootstrap.Modal.getInstance(loginModalRef.current);
-        if (modal) modal.hide(); // Close modal first
-        navigate('/dashboard');
+        if (validateMobile() && termsAccepted) {
+            const otp = generateOTP();
+            setGeneratedOTP(otp);
+            console.log(`Demo OTP: ${otp}`); // For testing - remove in production
+            alert(`Your Demo otp : ${otp}`);
+            setStep(2);
+            setTimer(30);
+            setResendDisabled(true);
+            // In a real app, you would send this OTP to the user's mobile
+        }
     };
+
+    const handleVerifyOTP = (e) => {
+        e.preventDefault();
+        const enteredOTP = otp.join(""); // Combine the 4 input digits
+
+        if (!enteredOTP) {
+            setErrors({ ...errors, otp: "OTP is required" });
+            return;
+        }
+
+        if (enteredOTP.length !== 4) {
+            setErrors({ ...errors, otp: "Enter a valid 4-digit OTP" });
+            return;
+        }
+
+        // Demo verification - compare with generatedOTP
+        if (enteredOTP === generatedOTP) {
+            setErrors({ ...errors, otp: "" });
+            setStep(3);
+        } else {
+            setErrors({ ...errors, otp: "Invalid OTP. Please try again." });
+        }
+    };
+
+    const handleResendOTP = () => {
+        const newOTP = generateOTP();
+        setGeneratedOTP(newOTP);
+        console.log(`New Demo OTP: ${newOTP}`); // For testing - remove in production
+        alert(`Your Demo otp : ${newOTP}`);
+        setTimer(30);
+        setResendDisabled(true);
+        setOtp(["", "", "", ""]); // Clear previous OTP inputs
+        // In a real app, you would resend the new OTP to the user's mobile
+    };
+
+    const validateSignUp = () => {
+        let valid = true;
+        const newErrors = { ...errors };
+
+        if (!name) {
+            newErrors.name = "Name is required";
+            valid = false;
+        } else {
+            newErrors.name = "";
+        }
+
+        if (!email) {
+            newErrors.email = "Email is required";
+            valid = false;
+        } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+            newErrors.email = "Enter a valid email address";
+            valid = false;
+        } else {
+            newErrors.email = "";
+        }
+
+        if (!location) {
+            newErrors.location = "Location is required";
+            valid = false;
+        } else {
+            newErrors.location = "";
+        }
+
+        setErrors(newErrors);
+        return valid;
+    };
+
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+        if (validateSignUp()) {
+            const userData = {
+                name,
+                email,
+                mobile: mobileNumber,
+                location,
+                loggedIn: true,
+                token: 'demo-token-' + Math.random().toString(36).substring(2, 15)
+            };
+
+            try {
+                // Store user in session storage and state
+                sessionStorage.setItem('user', JSON.stringify(userData));
+                setUser(userData); // This is crucial for updating the UI
+
+                // Close modal
+                const modal = window.bootstrap.Modal.getInstance(loginModalRef.current);
+                if (modal) modal.hide();
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Signup failed. Please try again.');
+            }
+        }
+    };
+
+    const handleLogout = () => {
+        // Clear session storage and user state
+        sessionStorage.removeItem('user');
+        setUser(null);
+        navigate('/');
+    };
+
     const handleImageClick = () => {
-        alert('Clicked New Arrival Product!!!!')
-        //navigate("/dashboard/new-arrivals");
+        alert('Clicked New Arrival Product!!!!');
     };
+
     const handleNewArrivals = () => {
-        alert('Clicked on New Arrivals Page!!!')
+        alert('Clicked on New Arrivals Page!!!');
     };
 
-
-
-
+    // ... rest of your component code (return statement) remains the same
+    // Just make sure to update the form inputs to use the state values and handlers
 
     return (
         <>
-            <Navbar />
+            <Navbar user={user} onLogin={loginModal} onLogout={handleLogout} />
+            {/* ... rest of your JSX remains the same until the login modal forms */}
+
             <div className="container-fluid w-100">
                 <div className="row h-100 align-items-center justify-content-center">
                     <div className="col-sm-6 p-3">
@@ -441,12 +605,12 @@ function Home() {
                 </div>
             </div>
 
-            {/* Login Modal */}
+            {/* Updated Login Modal Forms */}
             <div className="modal fade" id="loginModal" ref={loginModalRef} tabIndex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-xl">
                     <div className="modal-content" style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white
-                        backdropFilter: 'blur(10px)', // Blur effect
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                        backdropFilter: 'blur(10px)',
                         border: '1px solid rgba(255, 255, 255, 0.2)',
                         borderRadius: '10px',
                         overflow: 'hidden'
@@ -458,53 +622,46 @@ function Home() {
                                     <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-white justify-content-center min-vh-100 p-4 home1">
                                         <h2>Login</h2>
                                         <p>Get access to your Orders, Wishlist and Recommendations</p>
-                                        <img src={loginpng} className="img-fluid" />
+                                        <img src={loginpng} className="img-fluid" alt="Login" />
                                     </div>
-                                    <div className="col-lg-6 col-md-6 col-12  d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
+                                    <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
                                         style={{ backgroundColor: "Transparent" }}>
-                                        <form className="w-75" >
+                                        <form className="w-75" onSubmit={handleRequestOTP}>
                                             <label htmlFor="mobile" className="form-label">Enter Your Mobile Number</label>
-                                            <input type="tel" className="form-control mb-3 w-100" placeholder="mobile" name="mobile" maxLength={10} required />
+                                            <input
+                                                type="tel"
+                                                className="form-control mb-3 w-100"
+                                                placeholder="Mobile"
+                                                name="mobile"
+                                                maxLength={10}
+                                                value={mobileNumber}
+                                                onChange={(e) => setMobileNumber(e.target.value)}
+                                                required
+                                            />
+                                            {errors.mobile && <div className="text-danger mb-3">{errors.mobile}</div>}
 
-                                            <button className="btn btn-success btn-lg w-100"
-                                                style={{ background: "linear-gradient(45deg, #DE2B59, #F8483C)" }}
-                                                onClick={() => { setStep(2) }}
-                                            >Request OTP
-                                            </button><br />
-                                            <div className="form-check mb-3">
-                                                <input className="form-check-input" type="checkbox" id="termsCheckbox" required />
-                                                <label className="form-check-label" htmlFor="termsCheckbox">
-                                                    By continuing, you agree to OD Card’s <a href="#" target="_blank">Terms & Conditions</a> and <a href="#" target="_blank">Privacy Policy</a>
-                                                </label>
-                                            </div>
-
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* SIGN-UP FORM */}
-                        {step === 2 && (
-                            <div className="container-fluid">
-                                <div className="row">
-                                    <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-white justify-content-center min-vh-100 p-4 home1">
-                                        <h2>Verify OTP</h2>
-                                        <p>Get access to your Orders, Wishlist and Recommendations</p>
-                                        <img src={loginpng} className="img-fluid" />
-                                    </div>
-                                    <div className="col-lg-6 col-md-6 col-12  d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
-                                        style={{ background: 'transparent' }}>
-                                        <form className="w-75">
-                                            <label htmlFor="otp" className="form-label">Enter OTP</label>
-                                            <input type="tel" className="form-control mb-3 w-100" placeholder="otp" name="otp" required />
-
-                                            <button className="btn btn-success btn-lg w-100"
+                                            <button
+                                                className="btn btn-success btn-lg w-100"
                                                 style={{ background: "linear-gradient(45deg, #DE2B59, #F8483C)" }}
                                                 type="submit"
-                                                onClick={() => { setStep(3) }}
-                                            >Verify OTP
+                                            >
+                                                Request OTP
                                             </button>
+                                            <br />
+                                            <div className="form-check mb-3">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    id="termsCheckbox"
+                                                    checked={termsAccepted}
+                                                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                                                    required
+                                                />
+                                                <label className="form-check-label" htmlFor="termsCheckbox">
+                                                    By continuing, you agree to OD Card's <a href="#" target="_blank">Terms & Conditions</a> and <a href="#" target="_blank">Privacy Policy</a>
+                                                </label>
+                                            </div>
+                                            {!termsAccepted && errors.terms && <div className="text-danger mb-3">{errors.terms}</div>}
                                         </form>
                                     </div>
                                 </div>
@@ -512,37 +669,128 @@ function Home() {
                         )}
 
                         {/* OTP VERIFICATION */}
+                        {step === 2 && (
+                            <div className="container-fluid">
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-white justify-content-center min-vh-100 p-4 home1">
+                                        <h2>Verify OTP</h2>
+                                        <p>Get access to your Orders, Wishlist and Recommendations</p>
+                                        <img src={loginpng} className="img-fluid" alt="OTP Verification" />
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
+                                        style={{ background: 'transparent' }}>
+                                        <form className="w-75" onSubmit={handleVerifyOTP}>
+                                            <label htmlFor="otp" className="form-label">Enter OTP</label>
+                                            <div className="d-flex justify-content-between mb-3">
+                                                {otp.map((digit, index) => (
+                                                    <input
+                                                        key={index}
+                                                        id={`otp-${index}`}
+                                                        type="text"
+                                                        className="form-control text-center mx-1"
+                                                        style={{ width: "50px", height: "50px", fontSize: "1.2rem" }}
+                                                        maxLength={1}
+                                                        value={digit}
+                                                        onChange={(e) => handleOtpChange(index, e)}
+                                                        required
+                                                    />
+                                                ))}
+                                            </div>
+                                            {errors.otp && <div className="text-danger mb-3">{errors.otp}</div>}
+
+                                            <div className="mb-3">
+                                                {resendDisabled ? (
+                                                    <span>Resend OTP in {timer} seconds</span>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-link"
+                                                        onClick={handleResendOTP}
+                                                    >
+                                                        Resend OTP
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            <button
+                                                className="btn btn-success btn-lg w-100"
+                                                style={{ background: "linear-gradient(45deg, #DE2B59, #F8483C)" }}
+                                                type="submit"
+                                            >
+                                                Verify OTP
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* SIGN-UP FORM */}
                         {step === 3 && (
                             <div className="container-fluid">
                                 <div className="row">
                                     <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-white justify-content-center min-vh-100 p-4 home1">
                                         <h2>Sign Up</h2>
                                         <p>Get access to your Orders, Wishlist and Recommendations</p>
-                                        <img src={loginpng} className="img-fluid" />
+                                        <img src={loginpng} className="img-fluid" alt="Sign Up" />
                                     </div>
-                                    <div className="col-lg-6 col-md-6 col-12  d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
+                                    <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-center justify-content-center min-vh-100 text-white p-4 text-center"
                                         style={{ background: 'transparent' }}>
-                                        <form className="w-75" >
+                                        <form className="w-75" onSubmit={handleSignUp}>
                                             <label htmlFor="signup" className="form-label">Enter Your Details</label>
-                                            <input type="name" className="form-control mb-3 w-100" placeholder="Name" name="name" required />
-                                            <input type="email" className="form-control mb-3 w-100" placeholder="Email" name="email" required />
-                                            <input type="tel" className="form-control mb-3 w-100" placeholder="Mobile Number" name="mobile" maxLength={10} required />
-                                            <select className="form-select mb-3 w-100" name="location" required>
-                                                <option value="none" disabled>Select Location</option>
+                                            <input
+                                                type="text"
+                                                className="form-control mb-3 w-100"
+                                                placeholder="Name"
+                                                name="name"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                required
+                                            />
+                                            {errors.name && <div className="text-danger mb-3">{errors.name}</div>}
+
+                                            <input
+                                                type="email"
+                                                className="form-control mb-3 w-100"
+                                                placeholder="Email"
+                                                name="email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                required
+                                            />
+                                            {errors.email && <div className="text-danger mb-3">{errors.email}</div>}
+
+                                            <input
+                                                type="tel"
+                                                className="form-control mb-3 w-100"
+                                                placeholder="Mobile Number"
+                                                name="mobile"
+                                                value={mobileNumber}
+                                                readOnly
+                                                maxLength={10}
+                                                required
+                                            />
+
+                                            <select
+                                                className="form-select mb-3 w-100"
+                                                name="location"
+                                                value={location}
+                                                onChange={(e) => setLocation(e.target.value)}
+                                                required
+                                            >
+                                                <option value="">Select Location</option>
                                                 <option value="hyderabad">Hyderabad</option>
                                                 <option value="bengaluru">Bengaluru</option>
                                                 <option value="chennai">Chennai</option>
                                             </select>
+                                            {errors.location && <div className="text-danger mb-3">{errors.location}</div>}
 
-
-
-
-
-                                            <button className="btn btn-success btn-lg w-100"
+                                            <button
+                                                className="btn btn-success btn-lg w-100"
                                                 style={{ background: "linear-gradient(45deg, #DE2B59, #F8483C)" }}
-                                                type="button"
-                                                onClick={handleSignUp}
-                                            >Sign Up
+                                                type="submit"
+                                            >
+                                                Sign Up
                                             </button>
                                         </form>
                                     </div>

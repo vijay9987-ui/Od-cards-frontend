@@ -8,26 +8,7 @@ const MyCart = () => {
 
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [coupon, setCoupon] = useState("");
-  const [savedAddresses, setSavedAddresses] = useState([
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      address: "123 Main St",
-      city: "Delhi",
-      pincode: "110001",
-      type: "Home",
-    },
-    {
-      id: 2,
-      firstName: "Jane",
-      lastName: "Smith",
-      address: "456 Park Ave",
-      city: "Mumbai",
-      pincode: "400001",
-      type: "Office",
-    },
-  ]);
+  const [savedAddresses, setSavedAddresses] = useState([]);
 
   const [cartItems, setCartItems] = useState([]);
 

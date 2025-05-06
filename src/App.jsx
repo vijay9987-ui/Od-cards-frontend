@@ -33,21 +33,21 @@ function App() {
           <Route path="/dashboard/faqpage" element={<FaqPage />} />
 
           {/* Private Routes - Requires Authentication */}
-          {/* {<Route element={<PrivateRoute />}>} */}
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/dashboard/category/visiting-cards' element={<VisitingCards />} />
-          <Route path="/dashboard/category/readymadecards" element={<ReadyMadeCards />} />
-          <Route path="/dashboard/category/weddingcards" element={<WeddingCards />} />
-          <Route path="/dashboard/category/invitation-cards" element={<InvitationCards />} />
-          <Route path="/dashboard/category/weddingcarddetails/:category/:cardId" element={<WeddingCardDetails />} />
-          <Route path="/dashboard/card-details" element={<CardDetails />} />
-          <Route path="/dashboard/category/invitation-cards/:id" element={<InvitationCardDetails />} />
-          <Route path="/dashboard/new-arrivals" element={<NewArrivals />} />
-          <Route path="/dashboard/new-arrivals/:id" element={<ProductDetail />} />
-          <Route path="/dashboard/mycart" element={<MyCart />} />
-          <Route path="/dashboard/profile" element={<ProfilePage />} />
+          <Route element={<PrivateRoute />}>
+            <Route path='/dashboard' element={<Dashboard />} />
+            <Route path='/dashboard/category/visiting-cards' element={<VisitingCards />} />
+            <Route path="/dashboard/category/readymadecards" element={<ReadyMadeCards />} />
+            <Route path="/dashboard/category/weddingcards" element={<WeddingCards />} />
+            <Route path="/dashboard/category/invitation-cards" element={<InvitationCards />} />
+            <Route path="/dashboard/category/weddingcarddetails/:category/:cardId" element={<WeddingCardDetails />} />
+            <Route path="/dashboard/card-details" element={<CardDetails />} />
+            <Route path="/dashboard/category/invitation-cards/:id" element={<InvitationCardDetails />} />
+            <Route path="/dashboard/new-arrivals" element={<NewArrivals />} />
+            <Route path="/dashboard/new-arrivals/:id" element={<ProductDetail />} />
+            <Route path="/dashboard/mycart" element={<MyCart />} />
+            <Route path="/dashboard/profile" element={<ProfilePage />} />
 
-          {/* {</Route>} */}
+          </Route>
         </Routes>
       </Router>
     </>
