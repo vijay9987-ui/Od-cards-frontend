@@ -14,10 +14,8 @@ function Home() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [location, setLocation] = useState("");
-    const [otpInput, setOtpInput] = useState("");
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [centerIndex, setCenterIndex] = useState(2);
-    const [showLoginModal, setShowLoginModal] = useState(false);
     const [errors, setErrors] = useState({
         mobile: "",
         otp: "",
@@ -26,8 +24,55 @@ function Home() {
         location: "",
         terms: ""
     });
-
     const [user, setUser] = useState(null);
+    const [generatedOTP, setGeneratedOTP] = useState("");
+    const loginModalRef = useRef(null);
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [categoryError, setCategoryError] = useState(null);
+
+    // Fetch categories on component mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/categories/allcategories');
+                const data = await response.json();
+                if (response.ok) {
+                    setCategories(data.categories);
+                } else {
+                    setCategoryError(data.message || 'Failed to fetch categories');
+                }
+            } catch (error) {
+                setCategoryError('Network error while fetching categories');
+                console.error('Category fetch error:', error);
+            } finally {
+                setLoadingCategories(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    // Timer effect for OTP resend
+    useEffect(() => {
+        let interval;
+        if (timer > 0 && resendDisabled) {
+            interval = setInterval(() => {
+                setTimer(prev => prev - 1);
+            }, 1000);
+        } else if (timer === 0) {
+            setResendDisabled(false);
+        }
+        return () => clearInterval(interval);
+    }, [timer, resendDisabled]);
+
+    // Auto-slide carousel effect
+    useEffect(() => {
+        const interval = setInterval(() => {
+            slide("next");
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [centerIndex]);
 
     // Check for existing session on component mount
     useEffect(() => {
@@ -43,8 +88,6 @@ function Home() {
             navigate('/dashboard');
         }
     }, [user, navigate]);
-
-
 
     const products = [
         {
@@ -88,31 +131,6 @@ function Home() {
             category: "Wedding Cards"
         }
     ];
-
-
-
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            slide("next");
-        }, 3000); // Change image every 3 seconds
-
-        return () => clearInterval(interval); // Clear on unmount
-    }, []);
-
-    const slide = (direction) => {
-        if (direction === "next") {
-            setCenterIndex((prev) => (prev + 1) % products.length);
-        } else {
-            setCenterIndex((prev) => (prev - 1 + products.length) % products.length);
-        }
-    };
-
-    const getImageClass = (offset) => {
-        if (offset === 0) return "carousel-img center";
-        if (offset === -1 || offset === 1) return "carousel-img medium";
-        return "carousel-img small";
-    };
 
     const freeCards = [
         {
@@ -190,15 +208,48 @@ function Home() {
         { id: 4, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
     ];
 
-    const loginModalRef = useRef(null);
+    // Carousel functions
+    const slide = (direction) => {
+        if (direction === "next") {
+            setCenterIndex((prev) => (prev + 1) % products.length);
+        } else {
+            setCenterIndex((prev) => (prev - 1 + products.length) % products.length);
+        }
+    };
 
+    const getImageClass = (offset) => {
+        if (offset === 0) return "carousel-img center";
+        if (offset === -1 || offset === 1) return "carousel-img medium";
+        return "carousel-img small";
+    };
+
+    // Modal functions
     const loginModal = () => {
         if (loginModalRef.current) {
             const modal = new window.bootstrap.Modal(loginModalRef.current);
             modal.show();
+            resetForm();
         }
     };
 
+    const resetForm = () => {
+        setStep(1);
+        setMobileNumber("");
+        setOtp(["", "", "", ""]);
+        setName("");
+        setEmail("");
+        setLocation("");
+        setErrors({
+            mobile: "",
+            otp: "",
+            name: "",
+            email: "",
+            location: "",
+            terms: ""
+        });
+    };
+
+    // OTP functions
     const handleOtpChange = (index, e) => {
         const value = e.target.value;
         if (isNaN(value)) return;
@@ -212,43 +263,36 @@ function Home() {
         }
     };
 
-    const validateMobile = () => {
-        if (!mobileNumber) {
-            setErrors({ ...errors, mobile: "Mobile number is required" });
-            return false;
-        }
-        if (mobileNumber.length !== 10) {
-            setErrors({ ...errors, mobile: "Enter a valid 10-digit mobile number" });
-            return false;
-        }
-        setErrors({ ...errors, mobile: "" });
-        return true;
-    };
-
-    // Generate a random 4-digit OTP (for demo purposes)
     const generateOTP = () => {
         return Math.floor(1000 + Math.random() * 9000).toString();
     };
-
-    const [generatedOTP, setGeneratedOTP] = useState("");
 
     const handleRequestOTP = (e) => {
         e.preventDefault();
         if (validateMobile() && termsAccepted) {
             const otp = generateOTP();
             setGeneratedOTP(otp);
-            console.log(`Demo OTP: ${otp}`); // For testing - remove in production
-            alert(`Your Demo otp : ${otp}`);
+            console.log(`Demo OTP: ${otp}`);
+            alert(`Your Demo OTP: ${otp}`);
             setStep(2);
             setTimer(30);
             setResendDisabled(true);
-            // In a real app, you would send this OTP to the user's mobile
         }
+    };
+
+    const handleResendOTP = () => {
+        const newOTP = generateOTP();
+        setGeneratedOTP(newOTP);
+        console.log(`New Demo OTP: ${newOTP}`);
+        alert(`Your Demo OTP: ${newOTP}`);
+        setTimer(30);
+        setResendDisabled(true);
+        setOtp(["", "", "", ""]);
     };
 
     const handleVerifyOTP = (e) => {
         e.preventDefault();
-        const enteredOTP = otp.join(""); // Combine the 4 input digits
+        const enteredOTP = otp.join("");
 
         if (!enteredOTP) {
             setErrors({ ...errors, otp: "OTP is required" });
@@ -260,7 +304,6 @@ function Home() {
             return;
         }
 
-        // Demo verification - compare with generatedOTP
         if (enteredOTP === generatedOTP) {
             setErrors({ ...errors, otp: "" });
             setStep(3);
@@ -269,15 +312,18 @@ function Home() {
         }
     };
 
-    const handleResendOTP = () => {
-        const newOTP = generateOTP();
-        setGeneratedOTP(newOTP);
-        console.log(`New Demo OTP: ${newOTP}`); // For testing - remove in production
-        alert(`Your Demo otp : ${newOTP}`);
-        setTimer(30);
-        setResendDisabled(true);
-        setOtp(["", "", "", ""]); // Clear previous OTP inputs
-        // In a real app, you would resend the new OTP to the user's mobile
+    // Validation functions
+    const validateMobile = () => {
+        if (!mobileNumber) {
+            setErrors({ ...errors, mobile: "Mobile number is required" });
+            return false;
+        }
+        if (mobileNumber.length !== 10) {
+            setErrors({ ...errors, mobile: "Enter a valid 10-digit mobile number" });
+            return false;
+        }
+        setErrors({ ...errors, mobile: "" });
+        return true;
     };
 
     const validateSignUp = () => {
@@ -312,36 +358,58 @@ function Home() {
         return valid;
     };
 
+    // API functions
     const handleSignUp = async (e) => {
         e.preventDefault();
-        if (validateSignUp()) {
-            const userData = {
-                name,
-                email,
-                mobile: mobileNumber,
-                location,
-                loggedIn: true,
-                token: 'demo-token-' + Math.random().toString(36).substring(2, 15)
-            };
 
-            try {
-                // Store user in session storage and state
-                sessionStorage.setItem('user', JSON.stringify(userData));
-                setUser(userData); // This is crucial for updating the UI
+        if (!validateSignUp()) return;
 
-                // Close modal
-                const modal = window.bootstrap.Modal.getInstance(loginModalRef.current);
-                if (modal) modal.hide();
+        try {
+            const response = await fetch('http://localhost:5000/api/users/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    mobile: mobileNumber,
+                    location
+                }),
+            });
 
-            } catch (error) {
-                console.error('Signup error:', error);
-                alert('Signup failed. Please try again.');
+            const data = await response.json();
+            console.log("Full signup response:", data); // ✅
+
+            if (!response.ok && response.status !== 200) {
+                throw new Error(data.message || 'Registration failed');
             }
+
+
+            sessionStorage.setItem('user', JSON.stringify({
+                userId: data.user._id,
+                Name: data.user.name,
+                Mobile: data.user.mobile
+            }));
+            setUser(data.user);
+
+            const modal = bootstrap.Modal.getInstance(loginModalRef.current);
+            modal.hide();
+
+            navigate('/dashboard');
+
+
+        } catch (error) {
+            setErrors(prev => ({
+                ...prev,
+                form: error.message
+            }));
+            console.error('Registration error:', error);
         }
     };
 
+    // UI handlers
     const handleLogout = () => {
-        // Clear session storage and user state
         sessionStorage.removeItem('user');
         setUser(null);
         navigate('/');
@@ -355,13 +423,9 @@ function Home() {
         alert('Clicked on New Arrivals Page!!!');
     };
 
-    // ... rest of your component code (return statement) remains the same
-    // Just make sure to update the form inputs to use the state values and handlers
-
     return (
         <>
             <Navbar user={user} onLogin={loginModal} onLogout={handleLogout} />
-            {/* ... rest of your JSX remains the same until the login modal forms */}
 
             <div className="container-fluid w-100">
                 <div className="row h-100 align-items-center justify-content-center">
@@ -412,6 +476,7 @@ function Home() {
                     </div>
                 </div>
             </div>
+
             <div className="container-fluid">
                 <div className="scroll-wrapper rounded mt-2 p-2 ">
                     <div className="scroll-content">
@@ -433,24 +498,43 @@ function Home() {
                     </div>
                 </div>
                 <br />
-                <div className="row g-4">
-                    {[
-                        { title: "Wedding Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
-                        { title: "Readymade Wedding Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
-                        { title: "Visiting Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
-                        { title: "Invitation Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" }
-                    ].map((category, index) => (
-                        <div key={index} className="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div className="card text-bg-dark" onClick={loginModal}>
-                                <img style={{ filter: "blur(2px)", height: "100%", objectFit: "cover" }}
-                                    src={category.imgSrc} className="card-img img-fluid" alt={category.title} />
-                                <div className="card-img-overlay d-flex justify-content-center align-items-center">
-                                    <h5 className="card-title text2" style={{ cursor: "pointer" }} >{category.title}</h5>
+                {loadingCategories ? (
+                    <div className="text-center">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                ) : categoryError ? (
+                    <div className="alert alert-danger">{categoryError}</div>
+                ) : (
+                    <div className="row g-4">
+                        {categories.map((category) => (
+                            <div key={category._id} className="col-12 col-sm-6 col-md-4 col-lg-3">
+                                <div className="card text-bg-dark" onClick={loginModal}>
+                                    <img
+                                        style={{
+                                            filter: "blur(2px)",
+                                            objectFit: "cover",
+                                            height: "300px", // Ensure consistent height
+                                            width: "100%"
+                                        }}
+                                        src={category.image || "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg"}
+                                        className="card-img img-fluid"
+                                        alt={category.category}
+                                        onError={(e) => {
+                                            e.target.src = "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg";
+                                        }}
+                                    />
+                                    <div className="card-img-overlay d-flex justify-content-center align-items-center">
+                                        <h5 className="card-title text2" style={{ cursor: "pointer" }}>
+                                            {category.category}
+                                        </h5>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* New Arrival */}
@@ -605,7 +689,7 @@ function Home() {
                 </div>
             </div>
 
-            {/* Updated Login Modal Forms */}
+            {/* Login Modal */}
             <div className="modal fade" id="loginModal" ref={loginModalRef} tabIndex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-xl">
                     <div className="modal-content" style={{
@@ -661,7 +745,6 @@ function Home() {
                                                     By continuing, you agree to OD Card's <a href="#" target="_blank">Terms & Conditions</a> and <a href="#" target="_blank">Privacy Policy</a>
                                                 </label>
                                             </div>
-                                            {!termsAccepted && errors.terms && <div className="text-danger mb-3">{errors.terms}</div>}
                                         </form>
                                     </div>
                                 </div>
@@ -783,7 +866,7 @@ function Home() {
                                                 <option value="bengaluru">Bengaluru</option>
                                                 <option value="chennai">Chennai</option>
                                             </select>
-                                            {errors.location && <div className="text-danger mb-3">{errors.location}</div>}
+                                            {errors.form && <div className="alert alert-danger">{errors.form}</div>}
 
                                             <button
                                                 className="btn btn-success btn-lg w-100"

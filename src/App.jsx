@@ -36,8 +36,8 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/dashboard/category/visiting-cards' element={<VisitingCards />} />
-            <Route path="/dashboard/category/readymadecards" element={<ReadyMadeCards />} />
-            <Route path="/dashboard/category/weddingcards" element={<WeddingCards />} />
+            <Route path="/dashboard/category/readymade-cards" element={<ReadyMadeCards />} />
+            <Route path="/dashboard/category/wedding-cards" element={<WeddingCards />} />
             <Route path="/dashboard/category/invitation-cards" element={<InvitationCards />} />
             <Route path="/dashboard/category/weddingcarddetails/:category/:cardId" element={<WeddingCardDetails />} />
             <Route path="/dashboard/card-details" element={<CardDetails />} />

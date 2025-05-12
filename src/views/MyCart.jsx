@@ -2,27 +2,44 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import axios from "axios";
 
 const MyCart = () => {
   const location = useLocation();
-
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [savedAddresses, setSavedAddresses] = useState([]);
-
   const [cartItems, setCartItems] = useState([]);
-
   const [address, setAddress] = useState({
-    firstName: "",
-    lastName: "",
-    address: "",
+    name: "",
+    email: "",
+    mobileNumber: "",
+    addressline1: "",
+    addressline2: "",
     city: "",
+    state: "",
     pincode: "",
+    country: "India",
     type: "Home",
   });
-
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [editingAddress, setEditingAddress] = useState(null);
+
+  const savedUser = JSON.parse(sessionStorage.getItem('user'));
+  const userId = savedUser?.userId;
+
+  // Fetch saved addresses from the API
+  useEffect(() => {
+    if (userId) {
+      axios.get(`http://localhost:5000/api/addresses/${userId}`)
+        .then((response) => {
+          setSavedAddresses(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching addresses:", error);
+        });
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (location.state?.newItem) {
@@ -61,21 +78,26 @@ const MyCart = () => {
   };
 
   const handleAddAddress = () => {
-    const newAddress = {
-      id: savedAddresses.length + 1,
-      ...address,
-    };
-
-    setSavedAddresses((prev) => [...prev, newAddress]);
-    setShowAddressForm(false);
-    setAddress({
-      firstName: "",
-      lastName: "",
-      address: "",
-      city: "",
-      pincode: "",
-      type: "Home",
-    });
+    axios.post(`http://localhost:5000/api/addresses/${userId}`, address)
+      .then((response) => {
+        setSavedAddresses((prev) => [...prev, response.data]);
+        setShowAddressForm(false);
+        setAddress({
+          name: "",
+          email: "",
+          mobileNumber: "",
+          addressline1: "",
+          addressline2: "",
+          city: "",
+          state: "",
+          pincode: "",
+          country: "India",
+          type: "Home",
+        });
+      })
+      .catch((error) => {
+        console.error("Error adding address:", error);
+      });
   };
 
   const handleSelectAddress = (address) => {
@@ -83,7 +105,13 @@ const MyCart = () => {
   };
 
   const handleDeleteAddress = (id) => {
-    setSavedAddresses(savedAddresses.filter((address) => address.id !== id));
+    axios.delete(`http://localhost:5000/api/addresses/${userId}/${id}`)
+      .then(() => {
+        setSavedAddresses(savedAddresses.filter((address) => address._id !== id));
+      })
+      .catch((error) => {
+        console.error("Error deleting address:", error);
+      });
   };
 
   const handleEditAddress = (address) => {
@@ -93,25 +121,34 @@ const MyCart = () => {
   };
 
   const handleUpdateAddress = () => {
-    setSavedAddresses((prev) =>
-      prev.map((addr) => (addr.id === editingAddress.id ? { ...addr, ...address } : addr))
-    );
-    setEditingAddress(null);
-    setShowAddressForm(false);
-    setAddress({
-      firstName: "",
-      lastName: "",
-      address: "",
-      city: "",
-      pincode: "",
-      type: "Home",
-    });
+    axios.put(`http://localhost:5000/api/addresses/${userId}/${editingAddress._id}`, address)
+      .then((response) => {
+        setSavedAddresses((prev) =>
+          prev.map((addr) => (addr._id === editingAddress._id ? response.data : addr))
+        );
+        setEditingAddress(null);
+        setShowAddressForm(false);
+        setAddress({
+          name: "",
+          email: "",
+          mobileNumber: "",
+          addressline1: "",
+          addressline2: "",
+          city: "",
+          state: "",
+          pincode: "",
+          country: "India",
+          type: "Home",
+        });
+      })
+      .catch((error) => {
+        console.error("Error updating address:", error);
+      });
   };
 
   return (
     <>
       <Navbar />
-
       <div className="container my-5">
         <h3 className="fw-bold mb-4">
           <i className="fa fa-shopping-cart me-2"></i>My Cart
@@ -120,8 +157,8 @@ const MyCart = () => {
         {cartItems.length === 0 ? (
           <p>No items in your cart</p>
         ) : (
-          cartItems.map((item) => (
-            <div key={item.id} className="d-flex mb-4 border-bottom pb-4">
+          cartItems.map((item, index) => (
+            <div key={item.id || index} className="d-flex mb-4 border-bottom pb-4">
               <img
                 src={item.image}
                 alt={item.title}
@@ -195,37 +232,37 @@ const MyCart = () => {
                   {savedAddresses.length === 0 ? (
                     <p>No saved addresses</p>
                   ) : (
-                    savedAddresses.map((addr) => (
+                    savedAddresses.map((addr, index) => (
                       <div
-                        key={addr.id}
+                        key={addr._id || index}
                         className={`border p-3 mb-2 rounded`}
                         onClick={() => handleSelectAddress(addr)}
                         style={{
-                          background:
-                            selectedAddress?.id === addr.id
-                              ? "linear-gradient(to right, #F8483C, #DE2B59)"
-                              : "",
-                          color: selectedAddress?.id === addr.id ? "white" : "inherit",
+                          background: selectedAddress?._id === addr._id
+                            ? "linear-gradient(to right, #F8483C, #DE2B59)"
+                            : "",
+                          color: selectedAddress?._id === addr._id ? "white" : "inherit",
                           cursor: "pointer",
                         }}
                       >
+
                         <div className="fw-bold">
-                          {addr.firstName} {addr.lastName} ({addr.type})
+                          {addr.name} ({addr.type})
                         </div>
                         <div>
-                          {addr.address}, {addr.city} - {addr.pincode}
+                          {addr.addressline1}, {addr.city} - {addr.pincode}
                         </div>
                         <button
                           className="btn btn-outline-danger btn-sm mt-2"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteAddress(addr.id);
+                            handleDeleteAddress(addr._id);
                           }}
                         >
                           Delete
                         </button>
                         <button
-                          className="btn btn-outline-primary btn-sm mt-2 ms-2"
+                          className="btn btn-outline-warning btn-sm mt-2 ms-2"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditAddress(addr);
@@ -238,119 +275,142 @@ const MyCart = () => {
                   )}
                 </div>
                 <button
-                  className="btn btn-outline-primary mb-3 w-100"
-                  onClick={() => setShowAddressForm(true)}
+                  className="btn btn-outline-primary"
+                  onClick={handleProceed}
                 >
-                  + Add New Address
+                  Add New Address
                 </button>
               </>
             ) : (
               <>
-                <div className="row g-2 mb-2">
-                  <div className="col">
-                    <input
-                      className="form-control"
-                      placeholder="First Name"
-                      name="firstName"
-                      value={address.firstName}
-                      onChange={handleAddressChange}
-                    />
+                <h5 className="fw-bold">{editingAddress ? "Edit" : "Add New"} Address</h5>
+                <form>
+                  <input
+                    type="text"
+                    name="name"
+                    className="form-control mb-3"
+                    placeholder="Full Name"
+                    value={address.name}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    className="form-control mb-3"
+                    placeholder="Email"
+                    value={address.email}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                  <input
+                    type="tel"
+                    name="mobileNumber"
+                    className="form-control mb-3"
+                    placeholder="Mobile Number"
+                    value={address.mobileNumber}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                  <textarea
+                    name="addressline1"
+                    className="form-control mb-3"
+                    placeholder="Address Line 1"
+                    value={address.addressline1}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                  <textarea
+                    name="addressline2"
+                    className="form-control mb-3"
+                    placeholder="Address Line 2 (Optional)"
+                    value={address.addressline2}
+                    onChange={handleAddressChange}
+                  />
+                  <input
+                    type="text"
+                    name="city"
+                    className="form-control mb-3"
+                    placeholder="City"
+                    value={address.city}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                  <input
+                    type="text"
+                    name="state"
+                    className="form-control mb-3"
+                    placeholder="State"
+                    value={address.state}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                  <input
+                    type="text"
+                    name="pincode"
+                    className="form-control mb-3"
+                    placeholder="Pincode"
+                    value={address.pincode}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                  <input
+                    type="text"
+                    name="country"
+                    className="form-control mb-3"
+                    placeholder="Country"
+                    value={address.country}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                  <select
+                    name="type"
+                    className="form-select mb-3"
+                    value={address.type}
+                    onChange={handleAddressChange}
+                    required
+                  >
+                    <option value="Home">Home</option>
+                    <option value="Office">Office</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <div className="d-flex justify-content-between">
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => {
+                        setShowAddressForm(false);
+                        setEditingAddress(null);
+                        setAddress({
+                          name: "",
+                          email: "",
+                          mobileNumber: "",
+                          addressline1: "",
+                          addressline2: "",
+                          city: "",
+                          state: "",
+                          pincode: "",
+                          country: "India",
+                          type: "Home",
+                        });
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={editingAddress ? handleUpdateAddress : handleAddAddress}
+                    >
+                      {editingAddress ? "Update" : "Add"} Address
+                    </button>
                   </div>
-                  <div className="col">
-                    <input
-                      className="form-control"
-                      placeholder="Last Name"
-                      name="lastName"
-                      value={address.lastName}
-                      onChange={handleAddressChange}
-                    />
-                  </div>
-                </div>
-                <input
-                  className="form-control mb-2"
-                  placeholder="Address"
-                  name="address"
-                  value={address.address}
-                  onChange={handleAddressChange}
-                />
-                <div className="row g-2 mb-2">
-                  <div className="col">
-                    <input
-                      className="form-control"
-                      placeholder="City"
-                      name="city"
-                      value={address.city}
-                      onChange={handleAddressChange}
-                    />
-                  </div>
-                  <div className="col">
-                    <input
-                      className="form-control"
-                      placeholder="Pincode"
-                      name="pincode"
-                      value={address.pincode}
-                      onChange={handleAddressChange}
-                    />
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <div className="btn-group" role="group">
-                    <input
-                      type="radio"
-                      className="btn-check"
-                      name="type"
-                      id="home"
-                      value="Home"
-                      checked={address.type === "Home"}
-                      onChange={handleAddressChange}
-                    />
-                    <label className="btn btn-outline-dark" htmlFor="home">
-                      <i className="fa fa-home me-1"></i>Home
-                    </label>
-
-                    <input
-                      type="radio"
-                      className="btn-check"
-                      name="type"
-                      id="office"
-                      value="Office"
-                      checked={address.type === "Office"}
-                      onChange={handleAddressChange}
-                    />
-                    <label className="btn btn-outline-dark" htmlFor="office">
-                      <i className="fa fa-building me-1"></i>Office
-                    </label>
-                  </div>
-                </div>
-                <button
-                  className="btn btn-danger w-100"
-                  style={{
-                    background: "linear-gradient(to right, #F8483C, #DE2B59)",
-                    color: "white",
-                  }}
-                  onClick={editingAddress ? handleUpdateAddress : handleAddAddress}
-                >
-                  {editingAddress ? "Update Address" : "Save Address"}
-                </button>
+                </form>
               </>
             )}
           </div>
         </div>
-
-        <div className="d-flex justify-content-center align-items-center">
-          <button
-            type="button"
-            className="btn btn-lg"
-            style={{
-              background: "linear-gradient(to right, #F8483C, #DE2B59)",
-              color: "white",
-            }}
-          >
-            Proceed to Checkout
-          </button>
-        </div>
       </div>
-
       <Footer />
     </>
   );

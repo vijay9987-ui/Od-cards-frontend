@@ -7,6 +7,32 @@ import OrderModal from "../pages/orderModal";
 function Dashboard() {
     const navigate = useNavigate();
 
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [categoryError, setCategoryError] = useState(null);
+
+    // Fetch categories on component mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/categories/allcategories');
+                const data = await response.json();
+                if (response.ok) {
+                    setCategories(data.categories);
+                } else {
+                    setCategoryError(data.message || 'Failed to fetch categories');
+                }
+            } catch (error) {
+                setCategoryError('Network error while fetching categories');
+                console.error('Category fetch error:', error);
+            } finally {
+                setLoadingCategories(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     const products = [
         {
             id: 1,
@@ -151,9 +177,11 @@ function Dashboard() {
         { id: 4, image: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg" },
     ];
 
-    const handleCategoryClick = (link) => {
-        if (link) navigate(link);
+    const handleCategoryClick = (category) => {
+        const formattedName = category.toLowerCase().replace(/\s+/g, '-');
+        navigate(`/dashboard/category/${formattedName}`);
     };
+
 
     const handleCardClick = (category, id) => {
         navigate(`/dashboard/category/weddingcarddetails/${category}/${id}`);
@@ -189,7 +217,7 @@ function Dashboard() {
                             background: 'linear-gradient(to right, #F8483C, #DE2B59)',
                             color: 'white'
                         }}
-                        onClick={()=>{navigate('/dashboard/mycart')}}
+                            onClick={() => { navigate('/dashboard/mycart') }}
                         >Order Now</button>
 
                     </div>
@@ -249,27 +277,43 @@ function Dashboard() {
                 </div>
             </div>
 
-            {/* Categories */}
-            <div className="container-fluid p-5">
+            {/* Category section */}
+            <div className="container-fluid p-5 ">
                 <div className="row align-items-center text-center text-md-start">
                     <div className="col-12 col-md-4">
-                        <h2 className="mb-4" style={{ cursor: "pointer" }}>Category</h2>
+                        <h2 className="mb-4">Explore All Category</h2>
                     </div>
                 </div>
-                <br />
                 <div className="row g-4">
-                    {[
-                        { title: "Wedding Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg", link: "/dashboard/category/weddingcards" },
-                        { title: "Readymade Wedding Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg", link: "/dashboard/category/readymadecards" },
-                        { title: "Visiting Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg", link: "/dashboard/category/visiting-cards" },
-                        { title: "Invitation Cards", imgSrc: "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg", link: "/dashboard/category/invitation-cards" }
-                    ].map((category, index) => (
-                        <div key={index} className="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div className="card text-bg-dark" onClick={() => handleCategoryClick(category.link)}>
-                                <img style={{ filter: "blur(2px)", height: "100%", objectFit: "cover" }}
-                                    src={category.imgSrc} className="card-img img-fluid" alt={category.title} />
+                    {categories.map((category) => (
+                        <div key={category._id} className="col-12 col-sm-6 col-md-6 col-lg-3">
+                            <div
+                                className="card text-bg-dark"
+                                onClick={() => handleCategoryClick(category.category)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                <img
+                                    style={{
+                                        filter: "blur(2px)",
+                                        objectFit: "cover",
+                                        height: "300px",
+                                        width: "100%",
+                                    }}
+                                    src={
+                                        category.image ||
+                                        "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg"
+                                    }
+                                    className="card-img img-fluid"
+                                    alt={category.category}
+                                    onError={(e) => {
+                                        e.target.src =
+                                            "https://img.freepik.com/free-vector/indian-wedding-invitation_52683-44378.jpg";
+                                    }}
+                                />
                                 <div className="card-img-overlay d-flex justify-content-center align-items-center">
-                                    <h5 className="card-title text2" style={{ cursor: "pointer" }} >{category.title}</h5>
+                                    <h5 className="card-title text2 text-center text-white">
+                                        {category.category}
+                                    </h5>
                                 </div>
                             </div>
                         </div>
@@ -277,9 +321,17 @@ function Dashboard() {
                 </div>
             </div>
 
+
+
+
             {/* New Arrival */}
-            <div className="container carousel-container">
-                <h2 className="mb-4" style={{ cursor: "pointer" }} onClick={handleNewArrivals}>New Arrivals</h2>
+            <div className="container-fluid carousel-container">
+                <div className="row align-items-center text-center text-md-start">
+                    <div className="col-12 col-md-4">
+                        <h2 className="ms-5" style={{ cursor: "pointer" }} onClick={handleNewArrivals}>New Arrivals</h2>
+                    </div>
+                </div>
+
                 <div className="carousel-wrapper">
                     {[-2, -1, 0, 1, 2].map((offset) => {
                         const index = (centerIndex + offset + products.length) % products.length;
@@ -307,8 +359,8 @@ function Dashboard() {
                     })}
                 </div>
                 <div className="carousel-controls text-center">
-                    <button onClick={() => slide("prev")} className="btn" style={{background: 'linear-gradient(to right, #F8483C, #DE2B59)', color: "white"}}><i className="fa-solid fa-arrow-left"></i></button>
-                    <button onClick={() => slide("next")} className="btn" style={{background: 'linear-gradient(to right, #F8483C, #DE2B59)', color: "white"}}><i className="fa-solid fa-arrow-right"></i></button>
+                    <button onClick={() => slide("prev")} className="btn" style={{ background: 'linear-gradient(to right, #F8483C, #DE2B59)', color: "white" }}><i className="fa-solid fa-arrow-left"></i></button>
+                    <button onClick={() => slide("next")} className="btn" style={{ background: 'linear-gradient(to right, #F8483C, #DE2B59)', color: "white" }}><i className="fa-solid fa-arrow-right"></i></button>
                 </div>
             </div>
 
