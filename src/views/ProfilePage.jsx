@@ -47,7 +47,7 @@ const ProfilePage = () => {
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/user/${userId}`);
+        const res = await axios.get(`https://od-cards-backend.onrender.com/api/users/user/${userId}`);
         setUserInfo({
           name: res.data.user.name || '',
           email: res.data.user.email || '',
@@ -55,7 +55,7 @@ const ProfilePage = () => {
           location: res.data.user.location || 'none'
         });
 
-        const addressesRes = await axios.get(`http://localhost:5000/api/addresses/${userId}`);
+        const addressesRes = await axios.get(`https://od-cards-backend.onrender.com/api/addresses/${userId}`);
         setAddresses(addressesRes.data);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -75,7 +75,7 @@ const ProfilePage = () => {
       newAddress.pincode && newAddress.country
     ) {
       try {
-        const res = await axios.post(`http://localhost:5000/api/addresses/${userId}`, newAddress);
+        const res = await axios.post(`https://od-cards-backend.onrender.com/api/addresses/${userId}`, newAddress);
         setAddresses([...addresses, res.data]);
         setShowAddressForm(false);
         setNewAddress({
@@ -100,7 +100,7 @@ const ProfilePage = () => {
   const handleEditAddressSave = async () => {
     try {
       const updated = await axios.put(
-        `http://localhost:5000/api/addresses/${userId}/${addresses[editingIndex]._id}`,
+        `https://od-cards-backend.onrender.com/api/addresses/${userId}/${addresses[editingIndex]._id}`,
         editAddress
       );
       const updatedAddresses = [...addresses];
@@ -117,7 +117,7 @@ const ProfilePage = () => {
   const handleDeleteAddress = async (index) => {
     try {
       const idToDelete = addresses[index]._id;
-      await axios.delete(`http://localhost:5000/api/addresses/${userId}/${idToDelete}`);
+      await axios.delete(`https://od-cards-backend.onrender.com/api/addresses/${userId}/${idToDelete}`);
       const updated = addresses.filter((_, idx) => idx !== index);
       setAddresses(updated);
     } catch (err) {
@@ -129,7 +129,7 @@ const ProfilePage = () => {
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.put(`http://localhost:5000/api/users/updateuser/${userId}`, userInfo);
+      const res = await axios.put(`https://od-cards-backend.onrender.com/api/users/updateuser/${userId}`, userInfo);
       setUserInfo(res.data.user);
       setMessage('User updated successfully!');
       setIsEditing(false);

@@ -15,7 +15,7 @@ const InvitationCards = () => {
   useEffect(() => {
     const fetchInvitationCards = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/products/getallinvitaioncards");
+        const response = await fetch("https://od-cards-backend.onrender.com/api/products/getallinvitaioncards");
         
         if (!response.ok) {
           const errorData = await response.text();

@@ -15,7 +15,7 @@ function Dashboard() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/categories/allcategories');
+                const response = await fetch('https://od-cards-backend.onrender.com/api/categories/allcategories');
                 const data = await response.json();
                 if (response.ok) {
                     setCategories(data.categories);
